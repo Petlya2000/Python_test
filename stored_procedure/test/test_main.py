@@ -3,7 +3,6 @@ import os
 import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from stored_procedure.main import parse_csv, normalize_data, generate_payout_report
 def test_parse_csv_empty_file(tmp_path):
     empty_file = tmp_path / "empty.csv"
@@ -21,7 +20,15 @@ def test_parse_csv():
     data = parse_csv('test_data.csv')
     assert len(data) == 3
     assert data[0]['name'] == 'Alice Johnson'
-
+    
+def test_normalize_data_invalid_values():
+    raw_data = [
+        {'name': 'Alice', 'department': 'Marketing', 'hours_worked': 'invalid', 'hourly_rate': '50'},
+        {'name': 'Bob', 'department': 'Design', 'hours_worked': '150', 'hourly_rate': 'invalid'},
+    ]
+    with pytest.raises(ValueError):  
+        normalize_data(raw_data)
+       
 def test_normalize_data():
     raw_data = [
         {'name': 'Alice', 'department': 'Marketing', 'hours_worked': '160', 'hourly_rate': '50'},
@@ -30,6 +37,7 @@ def test_normalize_data():
     normalized = normalize_data(raw_data)
     assert normalized[0]['hourly_rate'] == 50
     assert normalized[1]['hourly_rate'] == 40
+    
 def test_normalize_data_invalid_values():
     raw_data = [
         {'name': 'Alice', 'department': 'Marketing', 'hours_worked': 'invalid', 'hourly_rate': '50'},
